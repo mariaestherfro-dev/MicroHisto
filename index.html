@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>MicroHisto App</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,146 +12,524 @@
       color: #fff;
       min-height: 100vh;
     }
-    .pantalla { display: none; padding: 20px; text-align: center; }
+    .pantalla { display: none; padding: 16px; }
     .pantalla.activa { display: block; }
-    .emoji { font-size: 55px; margin-top: 30px; margin-bottom: 10px; }
-    h1 { font-size: 24px; margin-bottom: 5px; }
-    .subtitulo { color: #aaa; font-size: 14px; margin-bottom: 30px; }
+    
+    /* Menú */
+    .menu-container { text-align: center; padding-top: 40px; }
+    .emoji { font-size: 55px; margin-bottom: 10px; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .subtitulo { color: #aaa; font-size: 13px; margin-bottom: 25px; }
+    
     .btn {
       display: block;
-      padding: 18px;
+      padding: 16px;
       border-radius: 14px;
-      margin: 10px 0;
+      margin: 8px 0;
       border: none;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
-      text-decoration: none;
       color: #fff;
       width: 100%;
+      text-align: center;
     }
     .btn-azul { background: #007AFF; }
     .btn-gris { background: #2a2a4a; border: 2px solid #3a3a5a; }
     .btn-verde { background: #34C759; }
-    .btn-volver { background: none; color: #007AFF; font-size: 15px; margin-top: 15px; }
+    .btn-naranja { background: #FF9500; }
+    .btn-rojo { background: #FF3B30; }
+    .btn-volver { background: none; color: #007AFF; font-size: 14px; margin-top: 10px; padding: 10px; }
+    .btn-small { padding: 10px; font-size: 13px; width: auto; display: inline-block; }
+    
     input[type="file"] { display: none; }
     label.btn { cursor: pointer; display: block; }
-    img { max-width: 100%; border-radius: 12px; margin: 15px 0; }
-    .lista { list-style: none; text-align: left; }
+    
+    img { max-width: 100%; border-radius: 12px; margin: 10px 0; }
+    
+    /* Formulario */
+    .section-title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      background: #2a2a4a;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1px solid #3a3a5a;
+      font-size: 12px;
+      color: #aaa;
+      cursor: pointer;
+    }
+    .chip.selected { background: #007AFF; border-color: #007AFF; color: #fff; font-weight: bold; }
+    
+    .input {
+      background: #2a2a4a;
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #3a3a5a;
+      font-size: 14px;
+      width: 100%;
+      margin-bottom: 6px;
+    }
+    .input::placeholder { color: #666; }
+    textarea.input { height: 70px; resize: vertical; }
+    
+    .row { display: flex; gap: 8px; }
+    .row > * { flex: 1; }
+    
+    .code-box {
+      background: #0a3d0a;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 12px 0;
+      text-align: center;
+      border: 1px solid #00cc00;
+    }
+    .code-label { color: #aaa; font-size: 10px; }
+    .code-value { color: #fff; font-size: 20px; font-weight: bold; margin-top: 2px; }
+    
+    .placenta-box {
+      background: rgba(255,149,0,0.15);
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid #FF9500;
+      text-align: center;
+      color: #FF9500;
+      font-size: 13px;
+    }
+    
+    /* Historial */
+    .lista { list-style: none; }
     .lista li {
       background: #2a2a4a;
       padding: 12px;
       border-radius: 10px;
-      margin: 8px 0;
-      display: flex;
-      align-items: center;
+      margin: 6px 0;
       border: 1px solid #3a3a5a;
     }
-    .lista img { width: 50px; height: 50px; border-radius: 6px; margin: 0 12px 0 0; }
-    .info { flex: 1; }
-    .codigo { font-weight: bold; font-size: 14px; }
-    .fecha { color: #aaa; font-size: 11px; }
-    .version { color: #555; font-size: 11px; margin-top: 40px; }
+    .lista .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .lista .codigo { color: #fff; font-weight: bold; font-size: 14px; }
+    .lista .tipo { color: #007AFF; font-size: 11px; }
+    .lista .fecha { color: #aaa; font-size: 11px; }
+    .lista .imagenes { display: flex; gap: 6px; margin-top: 6px; overflow-x: auto; }
+    .lista .imagenes img { width: 45px; height: 45px; border-radius: 6px; flex-shrink: 0; margin: 0; }
+    .lista .detalle { color: #ccc; font-size: 11px; margin-top: 4px; }
+    
+    .vacio { color: #666; text-align: center; margin-top: 40px; }
+    .contador { color: #aaa; font-size: 13px; margin-bottom: 10px; text-align: center; }
+    
+    .version { color: #555; font-size: 10px; text-align: center; margin-top: 30px; }
+    
+    /* Vista previa */
+    .preview-container { text-align: center; }
+    .preview-container img { max-height: 200px; }
   </style>
 </head>
 <body>
 
-<div id="menu" class="pantalla activa">
+<!-- ============ MENÚ PRINCIPAL ============ -->
+<div id="menu" class="pantalla activa menu-container">
   <div class="emoji">🔬</div>
   <h1>MicroHisto App</h1>
   <p class="subtitulo">Análisis histológico inteligente</p>
   
-  <button class="btn btn-azul" onclick="mostrar('captura')">
-    🆕 Nueva Muestra
-  </button>
-  
-  <button class="btn btn-gris" onclick="mostrar('historial'); cargarHistorial();">
-    📂 Archivos Guardados
-  </button>
-  
+  <button class="btn btn-azul" onclick="nuevaMuestra()">🆕 Nueva Muestra</button>
+  <button class="btn btn-gris" onclick="verHistorial()">📂 Archivos Guardados</button>
   <p class="version">v1.0</p>
 </div>
 
+<!-- ============ CAPTURA DE IMAGEN ============ -->
 <div id="captura" class="pantalla">
-  <h1>Nueva Muestra</h1>
-  <p class="subtitulo">Selecciona el origen de la imagen</p>
+  <h1>📸 Nueva Imagen</h1>
+  <p class="subtitulo">Muestra: <span id="codigoActual">---</span></p>
   
-  <img id="preview" src="" style="display:none;">
+  <div class="preview-container">
+    <img id="preview" src="" style="display:none;">
+  </div>
   
   <input type="file" id="camara" accept="image/*" capture="environment" onchange="mostrarPreview(this)">
   <label for="camara" class="btn btn-azul">📷 Abrir Cámara</label>
   
   <input type="file" id="galeria" accept="image/*" onchange="mostrarPreview(this)">
-  <label for="galeria" class="btn btn-gris">🖼️ Seleccionar de Galería</label>
+  <label for="galeria" class="btn btn-gris">🖼️ Galería</label>
   
-  <button class="btn btn-verde" id="btnGuardar" style="display:none;" onclick="guardarMuestra()">
-    💾 Guardar Muestra
+  <button class="btn btn-verde" id="btnAgregar" style="display:none;" onclick="agregarImagen()">
+    ➕ Agregar Imagen a la Muestra
   </button>
   
-  <button class="btn btn-volver" onclick="mostrar('menu')">← Volver al menú</button>
+  <p style="text-align:center;color:#aaa;margin-top:8px;">
+    Imágenes en esta muestra: <span id="contadorImagenes">0</span>
+  </p>
+  
+  <button class="btn btn-azul" onclick="irADatos()" style="margin-top:6px;">
+    📋 Ir al Formulario
+  </button>
+  <button class="btn btn-volver" onclick="cancelarMuestra()">← Cancelar</button>
 </div>
 
+<!-- ============ FORMULARIO DE DATOS ============ -->
+<div id="formulario" class="pantalla">
+  <h1>📋 Datos de la Muestra</h1>
+  
+  <!-- Tipo de muestra -->
+  <p class="section-title">📋 Tipo de Muestra *</p>
+  <div class="chip-row" id="chipsTipo"></div>
+  
+  <!-- Código -->
+  <p class="section-title">🔢 Código</p>
+  <div class="row">
+    <div>
+      <label style="color:#ccc;font-size:11px;">Año (XX) *</label>
+      <input class="input" id="year" type="number" maxlength="2" placeholder="24" oninput="generarCodigo()">
+    </div>
+    <div>
+      <label style="color:#ccc;font-size:11px;">Nº Registro *</label>
+      <input class="input" id="registro" type="number" placeholder="0152" oninput="generarCodigo()">
+    </div>
+  </div>
+  <label style="color:#ccc;font-size:11px;">Casete (opcional)</label>
+  <input class="input" id="casete" type="text" placeholder="3a" oninput="generarCodigo()">
+  
+  <div class="code-box" id="codeBox" style="display:none;">
+    <p class="code-label">📌 Código Generado:</p>
+    <p class="code-value" id="codeValue"></p>
+  </div>
+  
+  <!-- Datos del paciente -->
+  <p class="section-title">👤 Paciente</p>
+  <label style="color:#ccc;font-size:11px;">Grupo Etario *</label>
+  <div class="chip-row" id="chipsEtario"></div>
+  
+  <label style="color:#ccc;font-size:11px;">Sexo *</label>
+  <div class="chip-row" id="chipsSexo"></div>
+  
+  <label style="color:#ccc;font-size:11px;">Patologías asociadas</label>
+  <textarea class="input" id="patologias" placeholder="Diabetes, HTA..."></textarea>
+  
+  <div class="placenta-box" id="placentaBox" style="display:none;">
+    🧬 Se realizará detección automática de tejido placentario
+  </div>
+  
+  <button class="btn btn-verde" onclick="analizarMuestra()">
+    🔬 Analizar Muestra
+  </button>
+  <button class="btn btn-gris" onclick="masImagenes()">📸 Agregar más imágenes</button>
+  <button class="btn btn-volver" onclick="cancelarMuestra()">← Cancelar</button>
+</div>
+
+<!-- ============ RESULTADOS ============ -->
+<div id="resultados" class="pantalla">
+  <h1>🔬 Resultados</h1>
+  
+  <div class="code-box">
+    <p class="code-value" id="resCodigo">---</p>
+    <p id="resInfo" style="color:#aaa;font-size:12px;"></p>
+  </div>
+  
+  <p class="section-title">Diagnóstico Histológico (IA)</p>
+  <div id="resImagenes"></div>
+  
+  <p class="section-title">✍️ Diagnóstico Definitivo</p>
+  <textarea class="input" id="dxFinal" placeholder="Basado en la IA y tu conocimiento..."></textarea>
+  
+  <button class="btn btn-verde" onclick="guardarDefinitivo()">💾 Guardar en Base de Datos</button>
+  <button class="btn btn-volver" onclick="nuevaMuestra()">← Nueva muestra</button>
+</div>
+
+<!-- ============ HISTORIAL ============ -->
 <div id="historial" class="pantalla">
   <h1>📂 Archivos Guardados</h1>
-  <p class="subtitulo" id="contador">0 muestras</p>
-  
+  <p class="contador" id="contador"></p>
   <ul class="lista" id="listaHistorial"></ul>
-  
-  <p id="vacio" style="color:#666;">No hay muestras guardadas aún.</p>
-  
+  <p class="vacio" id="vacio">No hay muestras guardadas aún.</p>
   <button class="btn btn-volver" onclick="mostrar('menu')">← Volver al menú</button>
 </div>
 
 <script>
-  let imagenActual = null;
+  // ============ DATOS GLOBALES ============
+  const TIPOS = [
+    { label: 'Autopsia (A)', value: 'Autopsia', letra: 'A' },
+    { label: 'Biopsia (B)', value: 'Biopsia', letra: 'B' },
+    { label: 'Citología (C)', value: 'Citologia', letra: 'C' },
+  ];
+  
+  const ETARIOS = [
+    { label: 'Feto', value: 'Feto' },
+    { label: 'Neonato (0-1 m)', value: 'Neonato' },
+    { label: 'Lactante (1 m-1 a)', value: 'Lactante' },
+    { label: 'Niño (1-18 a)', value: 'Niño' },
+    { label: 'Adulto (19-59)', value: 'Adulto' },
+    { label: 'Adulto Mayor (+60)', value: 'Adulto Mayor' },
+  ];
+  
+  const SEXOS = ['Masculino', 'Femenino', 'Desconocido'];
+  
+  let muestraActual = {
+    imagenes: [],
+    tipo: '',
+    year: '',
+    registro: '',
+    casete: '',
+    etario: '',
+    sexo: '',
+    patologias: '',
+    codigo: '',
+  };
+  
+  let imagenTemporal = null;
+  let selecciones = { tipo: '', etario: '', sexo: '' };
 
+  // ============ NAVEGACIÓN ============
   function mostrar(id) {
     document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
     document.getElementById(id).classList.add('activa');
   }
 
+  // ============ NUEVA MUESTRA ============
+  function nuevaMuestra() {
+    muestraActual = {
+      imagenes: [],
+      tipo: '',
+      year: new Date().getFullYear().toString().slice(-2),
+      registro: '',
+      casete: '',
+      etario: '',
+      sexo: '',
+      patologias: '',
+      codigo: '',
+    };
+    imagenTemporal = null;
+    selecciones = { tipo: '', etario: '', sexo: '' };
+    
+    document.getElementById('codigoActual').textContent = '---';
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('btnAgregar').style.display = 'none';
+    document.getElementById('contadorImagenes').textContent = '0';
+    document.getElementById('camara').value = '';
+    document.getElementById('galeria').value = '';
+    
+    mostrar('captura');
+  }
+
+  function cancelarMuestra() {
+    if (muestraActual.imagenes.length > 0 && !confirm('¿Cancelar? Perderás las imágenes capturadas.')) return;
+    muestraActual = { imagenes: [], tipo: '', year: '', registro: '', casete: '', etario: '', sexo: '', patologias: '', codigo: '' };
+    imagenTemporal = null;
+    selecciones = { tipo: '', etario: '', sexo: '' };
+    mostrar('menu');
+  }
+
+  // ============ CAPTURA DE IMAGEN ============
   function mostrarPreview(input) {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
       reader.onload = function(e) {
-        const img = document.getElementById('preview');
-        img.src = e.target.result;
-        img.style.display = 'block';
-        document.getElementById('btnGuardar').style.display = 'block';
-        imagenActual = e.target.result;
+        document.getElementById('preview').src = e.target.result;
+        document.getElementById('preview').style.display = 'block';
+        document.getElementById('btnAgregar').style.display = 'block';
+        imagenTemporal = {
+          uri: e.target.result,
+          fecha: new Date().toISOString(),
+        };
       };
       reader.readAsDataURL(input.files[0]);
     }
   }
 
-  function guardarMuestra() {
-    if (!imagenActual) return;
-    
-    const muestras = JSON.parse(localStorage.getItem('muestras') || '[]');
-    const nueva = {
-      id: Date.now(),
-      imagen: imagenActual,
-      codigo: 'M-' + new Date().getFullYear() + '-' + (muestras.length + 1).toString().padStart(4, '0'),
-      fecha: new Date().toISOString(),
-    };
-    muestras.unshift(nueva);
-    localStorage.setItem('muestras', JSON.stringify(muestras));
-    
-    alert('✅ Muestra ' + nueva.codigo + ' guardada.');
-    imagenActual = null;
+  function agregarImagen() {
+    if (!imagenTemporal) return;
+    muestraActual.imagenes.push(imagenTemporal);
+    document.getElementById('contadorImagenes').textContent = muestraActual.imagenes.length;
     document.getElementById('preview').style.display = 'none';
-    document.getElementById('btnGuardar').style.display = 'none';
+    document.getElementById('btnAgregar').style.display = 'none';
     document.getElementById('camara').value = '';
     document.getElementById('galeria').value = '';
+    imagenTemporal = null;
+    alert('✅ Imagen agregada. Total: ' + muestraActual.imagenes.length);
+  }
+
+  function masImagenes() {
+    document.getElementById('codigoActual').textContent = muestraActual.codigo || '---';
+    document.getElementById('contadorImagenes').textContent = muestraActual.imagenes.length;
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('btnAgregar').style.display = 'none';
+    document.getElementById('camara').value = '';
+    document.getElementById('galeria').value = '';
+    imagenTemporal = null;
+    mostrar('captura');
+  }
+
+  // ============ FORMULARIO ============
+  function irADatos() {
+    // Llenar chips
+    llenarChips('chipsTipo', TIPOS.map(t => t.label), 'tipo');
+    llenarChips('chipsEtario', ETARIOS.map(e => e.label), 'etario');
+    llenarChips('chipsSexo', SEXOS, 'sexo');
+    
+    document.getElementById('year').value = muestraActual.year;
+    document.getElementById('registro').value = muestraActual.registro;
+    document.getElementById('casete').value = muestraActual.casete;
+    document.getElementById('patologias').value = muestraActual.patologias;
+    
+    // Restaurar selecciones visuales
+    restaurarChips('chipsTipo', selecciones.tipo);
+    restaurarChips('chipsEtario', selecciones.etario);
+    restaurarChips('chipsSexo', selecciones.sexo);
+    
+    generarCodigo();
+    mostrar('formulario');
+  }
+
+  function llenarChips(id, labels, tipo) {
+    const container = document.getElementById(id);
+    container.innerHTML = '';
+    labels.forEach(label => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = label;
+      chip.onclick = function() {
+        // Deseleccionar todos
+        container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        // Seleccionar este
+        chip.classList.add('selected');
+        selecciones[tipo] = label;
+        
+        // Actualizar datos
+        if (tipo === 'tipo') {
+          const encontrado = TIPOS.find(t => t.label === label);
+          muestraActual.tipo = encontrado ? encontrado.value : '';
+        } else if (tipo === 'etario') {
+          const encontrado = ETARIOS.find(e => e.label === label);
+          muestraActual.etario = encontrado ? encontrado.value : '';
+          document.getElementById('placentaBox').style.display = 
+            muestraActual.etario === 'Feto' ? 'block' : 'none';
+        } else if (tipo === 'sexo') {
+          muestraActual.sexo = label;
+        }
+        generarCodigo();
+      };
+      container.appendChild(chip);
+    });
+  }
+
+  function restaurarChips(id, valor) {
+    if (!valor) return;
+    const container = document.getElementById(id);
+    container.querySelectorAll('.chip').forEach(chip => {
+      if (chip.textContent === valor) {
+        chip.classList.add('selected');
+      }
+    });
+  }
+
+  function generarCodigo() {
+    muestraActual.year = document.getElementById('year').value || '';
+    muestraActual.registro = document.getElementById('registro').value || '';
+    muestraActual.casete = document.getElementById('casete').value || '';
+    
+    if (muestraActual.tipo && muestraActual.year && muestraActual.registro) {
+      const t = TIPOS.find(t => t.value === muestraActual.tipo);
+      const letra = t ? t.letra : '';
+      const c = muestraActual.casete || '1';
+      muestraActual.codigo = letra + '-' + muestraActual.year + '-' + 
+        muestraActual.registro.padStart(4, '0') + '-' + c;
+      
+      document.getElementById('codeBox').style.display = 'block';
+      document.getElementById('codeValue').textContent = muestraActual.codigo;
+      document.getElementById('codigoActual').textContent = muestraActual.codigo;
+    }
+  }
+
+  // ============ ANÁLISIS Y RESULTADOS ============
+  function analizarMuestra() {
+    // Validar
+    muestraActual.year = document.getElementById('year').value;
+    muestraActual.registro = document.getElementById('registro').value;
+    muestraActual.casete = document.getElementById('casete').value;
+    muestraActual.patologias = document.getElementById('patologias').value;
+    
+    if (!muestraActual.tipo || !muestraActual.year || !muestraActual.registro || 
+        !muestraActual.etario || !muestraActual.sexo) {
+      alert('⚠️ Completa todos los campos con *');
+      return;
+    }
+    
+    if (muestraActual.imagenes.length === 0) {
+      alert('⚠️ Agrega al menos una imagen');
+      return;
+    }
+    
+    // Simular IA
+    const diagnosticosIA = [
+      { tejido: 'Tejido conectivo denso', confianza: 94.5, notas: 'Fibras colágenas organizadas.' },
+      { tejido: 'Tejido epitelial estratificado', confianza: 89.2, notas: 'Sin atipias significativas.' },
+      { tejido: 'Tejido adiposo', confianza: 91.8, notas: 'Adipocitos maduros.' },
+      { tejido: 'Tejido muscular liso', confianza: 87.3, notas: 'Fibras musculares sin alteraciones.' },
+    ];
+    
+    muestraActual.imagenes = muestraActual.imagenes.map((img, i) => ({
+      ...img,
+      diagnostico_ia: diagnosticosIA[i % diagnosticosIA.length],
+    }));
+    
+    // Mostrar resultados
+    document.getElementById('resCodigo').textContent = muestraActual.codigo;
+    document.getElementById('resInfo').textContent = 
+      muestraActual.tipo + ' | ' + muestraActual.etario + ' | ' + muestraActual.sexo;
+    
+    const resImagenes = document.getElementById('resImagenes');
+    resImagenes.innerHTML = '';
+    muestraActual.imagenes.forEach((img, i) => {
+      resImagenes.innerHTML += `
+        <div style="background:#2a2a4a;border-radius:8px;padding:12px;margin:8px 0;display:flex;gap:10px;border:1px solid #3a3a5a;">
+          <img src="${img.uri}" style="width:65px;height:65px;border-radius:6px;">
+          <div style="flex:1;">
+            <p style="color:#007AFF;font-size:11px;font-weight:bold;">Imagen #${i+1}</p>
+            <p style="color:#fff;font-size:14px;margin-top:2px;">🧫 ${img.diagnostico_ia.tejido}</p>
+            <p style="color:#34C759;font-size:11px;margin-top:2px;">Confianza: ${img.diagnostico_ia.confianza}%</p>
+            <p style="color:#aaa;font-size:10px;margin-top:2px;font-style:italic;">📝 ${img.diagnostico_ia.notas}</p>
+          </div>
+        </div>
+      `;
+    });
+    
+    document.getElementById('dxFinal').value = '';
+    mostrar('resultados');
+  }
+
+  function guardarDefinitivo() {
+    const dx = document.getElementById('dxFinal').value;
+    muestraActual.diagnostico_definitivo = dx;
+    muestraActual.fecha_registro = new Date().toISOString();
+    muestraActual.id = Date.now();
+    
+    const muestras = JSON.parse(localStorage.getItem('muestras') || '[]');
+    muestras.unshift(muestraActual);
+    localStorage.setItem('muestras', JSON.stringify(muestras));
+    
+    alert('✅ Muestra ' + muestraActual.codigo + ' guardada correctamente.');
     mostrar('menu');
   }
 
-  function cargarHistorial() {
+  // ============ HISTORIAL ============
+  function verHistorial() {
     const muestras = JSON.parse(localStorage.getItem('muestras') || '[]');
     const lista = document.getElementById('listaHistorial');
     const vacio = document.getElementById('vacio');
     const contador = document.getElementById('contador');
     
-    contador.textContent = muestras.length + ' muestras';
+    contador.textContent = muestras.length + ' muestra(s) guardada(s)';
     lista.innerHTML = '';
     
     if (muestras.length === 0) {
@@ -161,17 +539,45 @@
       muestras.forEach((m, i) => {
         const li = document.createElement('li');
         li.innerHTML = `
-          <img src="${m.imagen}">
-          <div class="info">
-            <div class="codigo">${m.codigo}</div>
-            <div class="fecha">${new Date(m.fecha).toLocaleDateString()}</div>
+          <div class="header">
+            <span class="codigo">📋 ${m.codigo}</span>
+            <span class="tipo">${m.tipo}</span>
           </div>
-          <span style="color:#007AFF;font-weight:bold;">#${muestras.length - i}</span>
+          <div class="detalle">
+            ${m.etario} | ${m.sexo} | ${m.patologias || 'Sin patologías'}
+          </div>
+          <div class="detalle" style="margin-top:2px;">
+            Fecha: ${new Date(m.fecha_registro).toLocaleDateString()}
+          </div>
+          <div class="imagenes">
+            ${(m.imagenes || []).map(img => 
+              `<img src="${img.uri}" title="${img.diagnostico_ia?.tejido || 'Sin diagnóstico'}">`
+            ).join('')}
+          </div>
+          ${m.diagnostico_definitivo ? 
+            `<div class="detalle" style="color:#34C759;margin-top:6px;">✅ DX: ${m.diagnostico_definitivo.substring(0, 50)}...</div>` : 
+            ''}
+          <div style="text-align:right;margin-top:6px;">
+            <button class="btn btn-small btn-rojo" onclick="eliminarMuestra(${m.id})">🗑️</button>
+          </div>
         `;
         lista.appendChild(li);
       });
     }
+    
+    mostrar('historial');
   }
+
+  function eliminarMuestra(id) {
+    if (!confirm('¿Eliminar esta muestra definitivamente?')) return;
+    let muestras = JSON.parse(localStorage.getItem('muestras') || '[]');
+    muestras = muestras.filter(m => m.id !== id);
+    localStorage.setItem('muestras', JSON.stringify(muestras));
+    verHistorial();
+  }
+
+  // ============ INICIALIZAR ============
+  document.getElementById('year').value = new Date().getFullYear().toString().slice(-2);
 </script>
 
 </body>
