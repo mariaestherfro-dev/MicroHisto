@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MicroHisto App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a1a2e;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .pantalla { display: none; padding: 20px; text-align: center; }
+    .pantalla.activa { display: block; }
+    .emoji { font-size: 55px; margin-top: 30px; margin-bottom: 10px; }
+    h1 { font-size: 24px; margin-bottom: 5px; }
+    .subtitulo { color: #aaa; font-size: 14px; margin-bottom: 30px; }
+    .btn {
+      display: block;
+      padding: 18px;
+      border-radius: 14px;
+      margin: 10px 0;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #fff;
+      width: 100%;
+    }
+    .btn-azul { background: #007AFF; }
+    .btn-gris { background: #2a2a4a; border: 2px solid #3a3a5a; }
+    .btn-verde { background: #34C759; }
+    .btn-volver { background: none; color: #007AFF; font-size: 15px; margin-top: 15px; }
+    input[type="file"] { display: none; }
+    label.btn { cursor: pointer; display: block; }
+    img { max-width: 100%; border-radius: 12px; margin: 15px 0; }
+    .lista { list-style: none; text-align: left; }
+    .lista li {
+      background: #2a2a4a;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      border: 1px solid #3a3a5a;
+    }
+    .lista img { width: 50px; height: 50px; border-radius: 6px; margin: 0 12px 0 0; }
+    .info { flex: 1; }
+    .codigo { font-weight: bold; font-size: 14px; }
+    .fecha { color: #aaa; font-size: 11px; }
+    .version { color: #555; font-size: 11px; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+<div id="menu" class="pantalla activa">
+  <div class="emoji">🔬</div>
+  <h1>MicroHisto App</h1>
+  <p class="subtitulo">Análisis histológico inteligente</p>
+  
+  <button class="btn btn-azul" onclick="mostrar('captura')">
+    🆕 Nueva Muestra
+  </button>
+  
+  <button class="btn btn-gris" onclick="mostrar('historial'); cargarHistorial();">
+    📂 Archivos Guardados
+  </button>
+  
+  <p class="version">v1.0</p>
+</div>
+
+<div id="captura" class="pantalla">
+  <h1>Nueva Muestra</h1>
+  <p class="subtitulo">Selecciona el origen de la imagen</p>
+  
+  <img id="preview" src="" style="display:none;">
+  
+  <input type="file" id="camara" accept="image/*" capture="environment" onchange="mostrarPreview(this)">
+  <label for="camara" class="btn btn-azul">📷 Abrir Cámara</label>
+  
+  <input type="file" id="galeria" accept="image/*" onchange="mostrarPreview(this)">
+  <label for="galeria" class="btn btn-gris">🖼️ Seleccionar de Galería</label>
+  
+  <button class="btn btn-verde" id="btnGuardar" style="display:none;" onclick="guardarMuestra()">
+    💾 Guardar Muestra
+  </button>
+  
+  <button class="btn btn-volver" onclick="mostrar('menu')">← Volver al menú</button>
+</div>
+
+<div id="historial" class="pantalla">
+  <h1>📂 Archivos Guardados</h1>
+  <p class="subtitulo" id="contador">0 muestras</p>
+  
+  <ul class="lista" id="listaHistorial"></ul>
+  
+  <p id="vacio" style="color:#666;">No hay muestras guardadas aún.</p>
+  
+  <button class="btn btn-volver" onclick="mostrar('menu')">← Volver al menú</button>
+</div>
+
+<script>
+  let imagenActual = null;
+
+  function mostrar(id) {
+    document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+    document.getElementById(id).classList.add('activa');
+  }
+
+  function mostrarPreview(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.getElementById('preview');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('btnGuardar').style.display = 'block';
+        imagenActual = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function guardarMuestra() {
+    if (!imagenActual) return;
+    
+    const muestras = JSON.parse(localStorage.getItem('muestras') || '[]');
+    const nueva = {
+      id: Date.now(),
+      imagen: imagenActual,
+      codigo: 'M-' + new Date().getFullYear() + '-' + (muestras.length + 1).toString().padStart(4, '0'),
+      fecha: new Date().toISOString(),
+    };
+    muestras.unshift(nueva);
+    localStorage.setItem('muestras', JSON.stringify(muestras));
+    
+    alert('✅ Muestra ' + nueva.codigo + ' guardada.');
+    imagenActual = null;
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('btnGuardar').style.display = 'none';
+    document.getElementById('camara').value = '';
+    document.getElementById('galeria').value = '';
+    mostrar('menu');
+  }
+
+  function cargarHistorial() {
+    const muestras = JSON.parse(localStorage.getItem('muestras') || '[]');
+    const lista = document.getElementById('listaHistorial');
+    const vacio = document.getElementById('vacio');
+    const contador = document.getElementById('contador');
+    
+    contador.textContent = muestras.length + ' muestras';
+    lista.innerHTML = '';
+    
+    if (muestras.length === 0) {
+      vacio.style.display = 'block';
+    } else {
+      vacio.style.display = 'none';
+      muestras.forEach((m, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${m.imagen}">
+          <div class="info">
+            <div class="codigo">${m.codigo}</div>
+            <div class="fecha">${new Date(m.fecha).toLocaleDateString()}</div>
+          </div>
+          <span style="color:#007AFF;font-weight:bold;">#${muestras.length - i}</span>
+        `;
+        lista.appendChild(li);
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
